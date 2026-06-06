@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KAC Orders</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="bg-blur"></div>
+
+  <header class="glass">
+    <div class="brand">
+      <img src="assets/kac-logo.png" alt="KAC Logo">
+      <div>
+        <h1>Kuppies And Colours</h1>
+        <p>Craft Order Management</p>
+      </div>
+    </div>
+
+    <button id="themeToggle">🌙</button>
+  </header>
+
+  <main>
+    <section class="glass form-section">
+      <h2>Create / Update Order</h2>
+
+      <form id="orderForm">
+        <input type="hidden" id="orderId">
+
+        <div class="grid">
+          <input type="text" id="customerName" placeholder="Customer Name" required>
+          <input type="text" id="phone" placeholder="Phone Number" required>
+          <input type="text" id="product" placeholder="Product Name" required>
+          <input type="number" id="amount" placeholder="Amount" required>
+          <select id="status">
+            <option>Pending</option>
+            <option>Processing</option>
+            <option>Completed</option>
+            <option>Delivered</option>
+          </select>
+          <input type="date" id="deliveryDate">
+        </div>
+
+        <textarea id="notes" placeholder="Order Notes"></textarea>
+
+        <div class="btn-row">
+          <button type="submit">Save Order</button>
+          <button type="reset" class="secondary">Clear</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="glass">
+      <div class="top-bar">
+        <h2>Orders</h2>
+        <input type="text" id="searchInput" placeholder="Search orders...">
+      </div>
+
+      <div id="ordersContainer"></div>
+    </section>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
