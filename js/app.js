@@ -30,199 +30,352 @@ if(localStorage.getItem("theme")==="light"){
 document.body.classList.add("light");
 }
 
-let orders=JSON.parse(localStorage.getItem("kac-orders"))||[];
+/* =========================
+DATABASE
+========================= */
 
-function saveOrders(){
-localStorage.setItem("kac-orders",JSON.stringify(orders));
-updateDashboard();
+let categories = JSON.parse(localStorage.getItem("kac-categories")) || [];
+let products = JSON.parse(localStorage.getItem("kac-products")) || [];
+let orders = JSON.parse(localStorage.getItem("kac-orders")) || [];
+
+function saveAll(){
+localStorage.setItem("kac-categories", JSON.stringify(categories));
+localStorage.setItem("kac-products", JSON.stringify(products));
+localStorage.setItem("kac-orders", JSON.stringify(orders));
 }
 
-function renderOrders(filter=""){
-const container=document.getElementById("ordersContainer");
-if(!container)return;
+/* =========================
+CATEGORY LOGIC
+========================= */
 
-container.innerHTML="";
+function renderCategories(){
+const categoryList = document.getElementById("categoryList");
 
-orders.filter(o=>
-o.customerName.toLowerCase().includes(filter.toLowerCase())||
-o.product.toLowerCase().includes(filter.toLowerCase())
-).reverse().forEach(order=>{
+if(!categoryList) return;
 
-const div=document.createElement("div");
-div.className="order-card";
+categoryList.innerHTML = "";
 
-div.innerHTML=`
-<h3>${order.customerName}</h3>
-<p>${order.product}</p>
-<p>₹${order.amount}</p>
-<p>Status: ${order.status}</p>
+if(categories.length === 0){
+categoryList.innerHTML = "<p>No categories added yet.</p>";
+return;
+}
+
+categories.forEach((category,index)=>{
+
+const div = document.createElement("div");
+div.className = "order-card";
+
+div.innerHTML = `
+<h3>${category}</h3>
 
 <div class="order-actions">
-<button onclick="editOrder('${order.id}')">Edit</button>
-<button onclick="deleteOrder('${order.id}')">Delete</button>
+<button onclick="deleteCategory(${index})">Delete</button>
 </div>
 `;
 
-container.appendChild(div);
+categoryList.appendChild(div);
+
 });
 }
 
-const form=document.getElementById("orderForm");
+function deleteCategory(index){
+categories.splice(index,1);
+saveAll();
+renderCategories();
+loadCategoryDropdowns();
+}
 
-if(form){
-form.addEventListener("submit",e=>{
+const categoryForm = document.getElementById("categoryForm");
+
+if(categoryForm){
+categoryForm.addEventListener("submit",(e)=>{
+
 e.preventDefault();
 
-const data={
-id:document.getElementById("orderId").value||Date.now().toString(),
-customerName:document.getElementById("customerName").value,
-phone:document.getElementById("phone").value,
-product:document.getElementById("product").value,
-amount:document.getElementById("amount").value,
-status:document.getElementById("status").value,
-notes:document.getElementById("notes").value
+const categoryName = document.getElementById("categoryName").value.trim();
+
+if(!categoryName) return;
+
+if(categories.includes(categoryName)){
+alert("Category already exists");
+return;
+}
+
+categories.push(categoryName);
+
+saveAll();
+
+categoryForm.reset();
+
+renderCategories();
+
+loadCategoryDropdowns();
+
+});
+}
+
+/* =========================
+CATEGORY DROPDOWNS
+========================= */
+
+function loadCategoryDropdowns(){
+
+const dropdowns = document.querySelectorAll(".categoryDropdown");
+
+dropdowns.forEach(dropdown=>{
+
+const currentValue = dropdown.value;
+
+dropdown.innerHTML = `<option value="">Select Category</option>`;
+
+categories.forEach(category=>{
+
+dropdown.innerHTML += `
+<option value="${category}">
+${category}
+</option>
+`;
+
+});
+
+dropdown.value = currentValue;
+
+});
+
+}
+
+/* =========================
+PRODUCT LOGIC
+========================= */
+
+function renderProducts(){
+
+const productList = document.getElementById("productList");
+
+if(!productList) return;
+
+productList.innerHTML = "";
+
+if(products.length === 0){
+productList.innerHTML = "<p>No products added yet.</p>";
+return;
+}
+
+products.forEach((product,index)=>{
+
+const div = document.createElement("div");
+
+div.className = "order-card";
+
+div.innerHTML = `
+<h3>${product.name}</h3>
+<p>Category: ${product.category}</p>
+
+<div class="order-actions">
+<button onclick="deleteProduct(${index})">Delete</button>
+</div>
+`;
+
+productList.appendChild(div);
+
+});
+
+}
+
+function deleteProduct(index){
+
+products.splice(index,1);
+
+saveAll();
+
+renderProducts();
+
+}
+
+const productForm = document.getElementById("productForm");
+
+if(productForm){
+
+productForm.addEventListener("submit",(e)=>{
+
+e.preventDefault();
+
+const productName = document.getElementById("productName").value.trim();
+
+const productCategory = document.getElementById("productCategory").value;
+
+if(!productName || !productCategory){
+alert("Fill all fields");
+return;
+}
+
+products.push({
+name: productName,
+category: productCategory
+});
+
+saveAll();
+
+productForm.reset();
+
+renderProducts();
+
+});
+
+}
+
+/* =========================
+ORDER PRODUCT FILTER
+========================= */
+
+const orderCategory = document.getElementById("orderCategory");
+
+if(orderCategory){
+
+orderCategory.addEventListener("change",(e)=>{
+
+loadProductsByCategory(e.target.value);
+
+});
+
+}
+
+function loadProductsByCategory(category){
+
+const productDropdown = document.getElementById("productDropdown");
+
+if(!productDropdown) return;
+
+productDropdown.innerHTML = `
+<option value="">Select Product</option>
+`;
+
+products
+.filter(product=>product.category===category)
+.forEach(product=>{
+
+productDropdown.innerHTML += `
+<option value="${product.name}">
+${product.name}
+</option>
+`;
+
+});
+
+}
+
+/* =========================
+ORDER LOGIC
+========================= */
+
+function renderOrders(){
+
+const orderList = document.getElementById("orderList") || document.getElementById("ordersContainer");
+
+if(!orderList) return;
+
+orderList.innerHTML = "";
+
+if(orders.length === 0){
+orderList.innerHTML = "<p>No orders added yet.</p>";
+return;
+}
+
+orders.slice().reverse().forEach(order=>{
+
+const div = document.createElement("div");
+
+div.className = "order-card";
+
+div.innerHTML = `
+<h3>${order.customerName || order.customer}</h3>
+<p>Date: ${order.orderDate || order.date}</p>
+<p>Category: ${order.category}</p>
+<p>Product: ${order.product}</p>
+<p>₹${order.amount || 0}</p>
+<p>Status: ${order.status || "Pending"}</p>
+`;
+
+orderList.appendChild(div);
+
+});
+
+}
+
+const orderForm = document.getElementById("orderForm");
+
+if(orderForm){
+
+orderForm.addEventListener("submit",(e)=>{
+
+e.preventDefault();
+
+const orderData = {
+id: Date.now().toString(),
+orderDate: document.getElementById("orderDate")?.value || "",
+customerName: document.getElementById("customerName")?.value || "",
+phone: document.getElementById("phone")?.value || "",
+category: document.getElementById("orderCategory")?.value || "",
+product: document.getElementById("productDropdown")?.value || "",
+amount: document.getElementById("amount")?.value || "",
+status: document.getElementById("status")?.value || "Pending",
+notes: document.getElementById("notes")?.value || ""
 };
 
-const index=orders.findIndex(o=>o.id===data.id);
+orders.push(orderData);
 
-if(index>=0){
-orders[index]=data;
-}else{
-orders.push(data);
-}
+saveAll();
 
-saveOrders();
+orderForm.reset();
+
 renderOrders();
-form.reset();
+
 });
+
 }
 
-function editOrder(id){
-const order=orders.find(o=>o.id===id);
-
-document.getElementById("orderId").value=order.id;
-document.getElementById("customerName").value=order.customerName;
-document.getElementById("phone").value=order.phone;
-document.getElementById("product").value=order.product;
-document.getElementById("amount").value=order.amount;
-document.getElementById("status").value=order.status;
-document.getElementById("notes").value=order.notes;
-}
-
-function deleteOrder(id){
-orders=orders.filter(o=>o.id!==id);
-saveOrders();
-renderOrders();
-}
-
-const search=document.getElementById("searchInput");
-
-if(search){
-search.addEventListener("input",e=>{
-renderOrders(e.target.value);
-});
-}
+/* =========================
+DASHBOARD
+========================= */
 
 function updateDashboard(){
-const total=document.getElementById("totalOrders");
-const pending=document.getElementById("pendingOrders");
-const completed=document.getElementById("completedOrders");
 
-if(total) total.innerText=orders.length;
-if(pending) pending.innerText=orders.filter(o=>o.status==="Pending").length;
-if(completed) completed.innerText=orders.filter(o=>o.status==="Completed").length;
+const total = document.getElementById("totalOrders");
+
+const pending = document.getElementById("pendingOrders");
+
+const completed = document.getElementById("completedOrders");
+
+if(total) total.innerText = orders.length;
+
+if(pending){
+pending.innerText = orders.filter(order=>
+(order.status || "").toLowerCase()==="pending"
+).length;
 }
+
+if(completed){
+completed.innerText = orders.filter(order=>
+(order.status || "").toLowerCase()==="completed"
+).length;
+}
+
+}
+
+/* =========================
+INIT
+========================= */
+
+window.addEventListener("DOMContentLoaded",()=>{
+
+loadCategoryDropdowns();
+
+renderCategories();
+
+renderProducts();
 
 renderOrders();
+
 updateDashboard();
 
-
-
-let categories=JSON.parse(localStorage.getItem('kac-categories'))||[];
-let products=JSON.parse(localStorage.getItem('kac-products'))||[];
-let orders=JSON.parse(localStorage.getItem('kac-orders'))||[];
-
-function saveAll(){
-localStorage.setItem('kac-categories',JSON.stringify(categories));
-localStorage.setItem('kac-products',JSON.stringify(products));
-localStorage.setItem('kac-orders',JSON.stringify(orders));
-}
-
-function loadCategories(){
-document.querySelectorAll('.categoryDropdown').forEach(d=>{
-d.innerHTML='<option value="">Select Category</option>';
-categories.forEach(c=>{
-d.innerHTML+=`<option value="${c}">${c}</option>`;
 });
-});
-}
-
-const cf=document.getElementById('categoryForm');
-if(cf){
-cf.onsubmit=e=>{
-e.preventDefault();
-categories.push(categoryName.value);
-saveAll();
-location.reload();
-}
-}
-
-const pf=document.getElementById('productForm');
-if(pf){
-pf.onsubmit=e=>{
-e.preventDefault();
-products.push({name:productName.value,category:productCategory.value});
-saveAll();
-location.reload();
-}
-}
-
-const oc=document.getElementById('orderCategory');
-if(oc){
-oc.onchange=()=>{
-productDropdown.innerHTML='';
-products.filter(p=>p.category===oc.value).forEach(p=>{
-productDropdown.innerHTML+=`<option>${p.name}</option>`;
-});
-}
-}
-
-const of=document.getElementById('orderForm');
-if(of){
-of.onsubmit=e=>{
-e.preventDefault();
-orders.push({
-date:orderDate.value,
-customer:customerName.value,
-category:orderCategory.value,
-product:productDropdown.value
-});
-saveAll();
-location.reload();
-}
-}
-
-window.onload=()=>{
-loadCategories();
-
-const cl=document.getElementById('categoryList');
-if(cl){
-categories.forEach(c=>{
-cl.innerHTML+=`<div class='card'>${c}</div>`;
-});
-}
-
-const pl=document.getElementById('productList');
-if(pl){
-products.forEach(p=>{
-pl.innerHTML+=`<div class='card'>${p.name} - ${p.category}</div>`;
-});
-}
-
-const ol=document.getElementById('orderList');
-if(ol){
-orders.forEach(o=>{
-ol.innerHTML+=`<div class='card'>${o.date}<br>${o.customer}<br>${o.category}<br>${o.product}</div>`;
-});
-}
-}
