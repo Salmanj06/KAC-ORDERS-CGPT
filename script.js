@@ -1,3 +1,30 @@
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
+const menuBtn = document.getElementById("menuBtn");
+
+if(menuBtn){
+
+menuBtn.addEventListener("click",()=>{
+
+sidebar.classList.toggle("active");
+
+overlay.classList.toggle("active");
+
+});
+
+}
+
+if(overlay){
+
+overlay.addEventListener("click",()=>{
+
+sidebar.classList.remove("active");
+
+overlay.classList.remove("active");
+
+});
+
+}
 
 const form = document.getElementById("orderForm");
 const ordersContainer = document.getElementById("ordersContainer");
