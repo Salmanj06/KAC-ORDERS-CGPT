@@ -135,3 +135,94 @@ if(completed) completed.innerText=orders.filter(o=>o.status==="Completed").lengt
 
 renderOrders();
 updateDashboard();
+
+
+
+let categories=JSON.parse(localStorage.getItem('kac-categories'))||[];
+let products=JSON.parse(localStorage.getItem('kac-products'))||[];
+let orders=JSON.parse(localStorage.getItem('kac-orders'))||[];
+
+function saveAll(){
+localStorage.setItem('kac-categories',JSON.stringify(categories));
+localStorage.setItem('kac-products',JSON.stringify(products));
+localStorage.setItem('kac-orders',JSON.stringify(orders));
+}
+
+function loadCategories(){
+document.querySelectorAll('.categoryDropdown').forEach(d=>{
+d.innerHTML='<option value="">Select Category</option>';
+categories.forEach(c=>{
+d.innerHTML+=`<option value="${c}">${c}</option>`;
+});
+});
+}
+
+const cf=document.getElementById('categoryForm');
+if(cf){
+cf.onsubmit=e=>{
+e.preventDefault();
+categories.push(categoryName.value);
+saveAll();
+location.reload();
+}
+}
+
+const pf=document.getElementById('productForm');
+if(pf){
+pf.onsubmit=e=>{
+e.preventDefault();
+products.push({name:productName.value,category:productCategory.value});
+saveAll();
+location.reload();
+}
+}
+
+const oc=document.getElementById('orderCategory');
+if(oc){
+oc.onchange=()=>{
+productDropdown.innerHTML='';
+products.filter(p=>p.category===oc.value).forEach(p=>{
+productDropdown.innerHTML+=`<option>${p.name}</option>`;
+});
+}
+}
+
+const of=document.getElementById('orderForm');
+if(of){
+of.onsubmit=e=>{
+e.preventDefault();
+orders.push({
+date:orderDate.value,
+customer:customerName.value,
+category:orderCategory.value,
+product:productDropdown.value
+});
+saveAll();
+location.reload();
+}
+}
+
+window.onload=()=>{
+loadCategories();
+
+const cl=document.getElementById('categoryList');
+if(cl){
+categories.forEach(c=>{
+cl.innerHTML+=`<div class='card'>${c}</div>`;
+});
+}
+
+const pl=document.getElementById('productList');
+if(pl){
+products.forEach(p=>{
+pl.innerHTML+=`<div class='card'>${p.name} - ${p.category}</div>`;
+});
+}
+
+const ol=document.getElementById('orderList');
+if(ol){
+orders.forEach(o=>{
+ol.innerHTML+=`<div class='card'>${o.date}<br>${o.customer}<br>${o.category}<br>${o.product}</div>`;
+});
+}
+}

@@ -5,7 +5,7 @@
     <link rel="manifest" href="../manifest.json">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Orders</title>
+<title>Categories</title>
 <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
@@ -32,7 +32,7 @@
 <div class="brand">
 <img src="../assets/logo.png">
 <div>
-<h1>Orders</h1>
+<h1>Categories</h1>
 <p>Kuppies And Colours</p>
 </div>
 </div>
@@ -41,37 +41,12 @@
 </header>
 
 <section class="glass">
-<h2>Create Order</h2>
-
-<form id="orderForm">
-<input type="hidden" id="orderId">
-
-<input type="text" id="customerName" placeholder="Customer Name" required>
-<input type="text" id="phone" placeholder="Phone Number" required>
-<select id='orderCategory' class='categoryDropdown' required></select>
-<select id='productDropdown' required></select>
-<!--<input type="text" id="product" placeholder="Product Name" required>-->
-<input type="number" id="amount" placeholder="Amount" required>
-
-<select id="status">
-<option>Pending</option>
-<option>Processing</option>
-<option>Completed</option>
-</select>
-
-<textarea id="notes" placeholder="Order Notes"></textarea>
-
-<button type="submit">Save Order</button>
+<h2>Categories</h2>
+<form id='categoryForm'>
+<input id='categoryName' placeholder='Category Name' required>
+<button>Save Category</button>
 </form>
-</section>
-
-<section class="glass">
-<div class="search-row">
-<h2>Orders List</h2>
-<input type="text" id="searchInput" placeholder="Search">
-</div>
-
-<div id="ordersContainer"></div>
+<div id='categoryList'></div>
 </section>
 
 <script src="../js/app.js"></script>
